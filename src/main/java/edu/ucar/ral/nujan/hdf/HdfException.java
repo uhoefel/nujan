@@ -23,20 +23,14 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
-
 
 /**
  * Simple wrapper around java.lang.Exception.
  */
-
 public class HdfException extends Exception {
 
-public HdfException( String msg) {
-  super( msg);
+    public HdfException(String msg) {
+        super(msg);
+    }
 }
-
-} // end class
-
-

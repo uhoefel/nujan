@@ -23,24 +23,18 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
 /**
- * HDF5 message type 6: MsgLinkit:
- * Used to specify a link to another group,
+ * HDF5 message type 6: MsgLinkit: Used to specify a link to another group,
  * either from parent to child group or from group to variable.
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  */
+final class MsgLinkit extends MsgBase {
 
-class MsgLinkit extends MsgBase {
-
-
-
-final int linkitVersion = 1;
+    final int linkitVersion = 1;
 
 // Flag bits:
 //   bit  mask  desc
@@ -50,58 +44,44 @@ final int linkitVersion = 1;
 //   4    16   char set field is present.  If not present, ASCII.
 //   5-7         reserved
 
-final int linkFlag = 3 | 4;
-  // linkNameLen is 8 bytes; creation order is present
-  // No link type, no char set.
+    final int linkFlag = 3 | 4;
+    // linkNameLen is 8 bytes; creation order is present
+    // No link type, no char set.
 
-long linkOrder;              // creation order in the owning group
-HdfGroup linkGroup;          // the sub group
+    long linkOrder; // creation order in the owning group
+    HdfGroup linkGroup; // the sub group
 
+    MsgLinkit(long linkOrder, // creation order in the owning group
+            HdfGroup linkGroup, // the sub group
+            HdfGroup hdfGroup, // the owning group
+            HdfFileWriter hdfFile) throws HdfException {
+        super(TP_LINKIT, hdfGroup, hdfFile);
+        this.linkOrder = linkOrder;
+        this.linkGroup = linkGroup;
+    }
 
-MsgLinkit(
-  long linkOrder,                 // creation order in the owning group
-  HdfGroup linkGroup,             // the sub group
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-throws HdfException
-{
-  super( TP_LINKIT, hdfGroup, hdfFile);
-  this.linkOrder = linkOrder;
-  this.linkGroup = linkGroup;
-}
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  res += "  linkOrder: " + linkOrder;
-  res += "  linkGroup name: " + linkGroup.groupName;
-  return res;
-}
-
-
-
-
-
-
+    @Override
+    public String toString() {
+        String res = super.toString();
+        res += "  linkOrder: " + linkOrder;
+        res += "  linkGroup name: " + linkGroup.groupName;
+        return res;
+    }
 
 // Format everything after the message header
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  fmtBuf.putBufByte("MsgLinkit: linkitVersion", linkitVersion);
-  fmtBuf.putBufByte("MsgLinkit: linkFlag", linkFlag);
-  fmtBuf.putBufLong("MsgLinkit: linkOrder", linkOrder);
+    @Override
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        fmtBuf.putBufByte("MsgLinkit: linkitVersion", linkitVersion);
+        fmtBuf.putBufByte("MsgLinkit: linkFlag", linkFlag);
+        fmtBuf.putBufLong("MsgLinkit: linkOrder", linkOrder);
 
-  byte[] nameEnc = HdfUtil.encodeString(
-    linkGroup.groupName, false, hdfGroup);  // no null term
-  fmtBuf.putBufLong("MsgLinkit: linkName len", nameEnc.length);
-  fmtBuf.putBufBytes("MsgLinkit: linkName", nameEnc);
+        byte[] nameEnc = HdfUtil.encodeString(linkGroup.groupName, false, hdfGroup); // no null term
+        fmtBuf.putBufLong("MsgLinkit: linkName len", nameEnc.length);
+        fmtBuf.putBufBytes("MsgLinkit: linkName", nameEnc);
 
-  // External block
-  fmtBuf.putBufLong("MsgLinkit: linkGroup", linkGroup.blkPosition);
-  if (formatPass != 0) hdfFile.addWork("MsgLinkit", linkGroup);
+        // External block
+        fmtBuf.putBufLong("MsgLinkit: linkGroup", linkGroup.blkPosition);
+        if (formatPass != 0)
+            hdfFile.addWork("MsgLinkit", linkGroup);
+    }
 }
-
-} // end class

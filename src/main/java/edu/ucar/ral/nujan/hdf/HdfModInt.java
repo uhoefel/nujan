@@ -23,37 +23,36 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
-
 
 /**
  * Simply wraps a modifiable int.
  */
+final class HdfModInt {
 
-class HdfModInt {
+    private int ival;
 
-private int ival;
+    HdfModInt(int ival) {
+        this.ival = ival;
+    }
 
+    /** Returns the int's value */
+    int getValue() {
+        return ival;
+    }
 
-HdfModInt( int ival) {
-  this.ival = ival;
+    /** Sets the int's value */
+    void setValue(int ival) {
+        this.ival = ival;
+    }
+
+    /** Increments the int's value by 1 */
+    void increment() {
+        ival++;
+    }
+
+    @Override
+    public String toString() {
+        return Integer.toString(ival);
+    }
 }
-
-/** Returns the int's value */
-
-int getValue() { return ival; }
-
-/** Sets the int's value */
-void setValue( int ival) { this.ival = ival; }
-
-/** Increments the int's value by 1 */
-void increment() { ival++; }
-
-public String toString() {
-  return "" + ival;
-}
-
-} // end class
-
-

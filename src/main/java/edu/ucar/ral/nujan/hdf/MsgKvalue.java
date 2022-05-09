@@ -23,16 +23,13 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
 /**
- * HDF5 message type 19: MsgKvalue:
- * Used to keep some btree-related constants.
+ * HDF5 message type 19: MsgKvalue: Used to keep some btree-related constants.
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  *
  * About K values ...
  *
@@ -48,51 +45,35 @@ package edu.ucar.ral.nujan.hdf;
  *   internalK: 16
  *   storageK: 32
  * </pre>
- *
  */
+final class MsgKvalue extends MsgBase {
 
-class MsgKvalue extends MsgBase {
+    final int kvalueVersion = 0;
 
+    /**
+     * 
+     * @param hdfGroup the owning group
+     * @param hdfFile
+     */
+    MsgKvalue(HdfGroup hdfGroup, HdfFileWriter hdfFile) {
+        super(TP_K_VALUES, hdfGroup, hdfFile);
+    }
 
-
-final int kvalueVersion = 0;
-
-
-
-MsgKvalue(
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-throws HdfException
-{
-  super( TP_K_VALUES, hdfGroup, hdfFile);
-}
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  return res;
-}
-
-
-
-
+    // TODO necessary?
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
 // Format everything after the message header
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  //prtf("MsgKvalue: formatPass: %d  maxNumBtreeKid: %d",
-  //  formatPass, hdfFile.maxNumBtreeKid);
+    @Override
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        // This is twice as big as we need.
+        int kvalue = hdfFile.maxNumBtreeKid;
 
-  // This is twice as big as we need.
-  int kvalue = hdfFile.maxNumBtreeKid;
-
-  fmtBuf.putBufByte("MsgKvalue: kvalueVersion", kvalueVersion);
-  fmtBuf.putBufShort("MsgKvalue: storageK", kvalue);
-  fmtBuf.putBufShort("MsgKvalue: internalK", kvalue);
-  fmtBuf.putBufShort("MsgKvalue: leafK", kvalue);
+        fmtBuf.putBufByte("MsgKvalue: kvalueVersion", kvalueVersion);
+        fmtBuf.putBufShort("MsgKvalue: storageK", (short) kvalue);
+        fmtBuf.putBufShort("MsgKvalue: internalK", (short) kvalue);
+        fmtBuf.putBufShort("MsgKvalue: leafK", (short) kvalue);
+    }
 }
-
-} // end class

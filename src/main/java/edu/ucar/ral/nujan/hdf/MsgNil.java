@@ -23,43 +23,32 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
 /**
- * HDF5 message type 0: MsgNil: NIL msg to be ignored;
- * not used in this package
+ * HDF5 message type 0: MsgNil: NIL msg to be ignored; not used in this package
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  */
+final class MsgNil extends MsgBase {
 
-class MsgNil extends MsgBase {
+    int nilSize = 0;
 
-int nilSize = 0;
-
-MsgNil(
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-{
-  super( TP_NIL, hdfGroup, hdfFile);
-}
-
-
-
-
+    /**
+     * 
+     * @param hdfGroup the owning group
+     * @param hdfFile
+     */
+    MsgNil(HdfGroup hdfGroup, HdfFileWriter hdfFile) {
+        super(TP_NIL, hdfGroup, hdfFile);
+    }
 
 // Format everything after the message header
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  for (int ii = 0; ii < nilSize; ii++) {
-    fmtBuf.putBufByte("MsgNil: msg 0 content", 0);
-  }
+    @Override
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        for (int ii = 0; ii < nilSize; ii++) {
+            fmtBuf.putBufByte("MsgNil: msg 0 content", 0);
+        }
+    }
 }
-
-
-
-
-} // end class

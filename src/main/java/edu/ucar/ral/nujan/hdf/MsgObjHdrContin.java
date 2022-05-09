@@ -23,56 +23,41 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
 /**
- * HDF5 message type 16: object header continuation -
- * not used in this package
+ * HDF5 message type 16: object header continuation - not used in this package
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  */
+final class MsgObjHdrContin extends MsgBase {
 
-class MsgObjHdrContin extends MsgBase {
+    long continAddr; // position of continuation
+    long continLen; // len of continuation
 
-long continAddr;              // position of continuation
-long continLen;               // len of continuation
+    /**
+     * 
+     * @param hdfGroup the owning group
+     * @param hdfFile
+     */
+    MsgObjHdrContin(HdfGroup hdfGroup, HdfFileWriter hdfFile) {
+        super(TP_OBJ_HDR_CONTIN, hdfGroup, hdfFile);
+    }
 
+    @Override
+    public String toString() {
+        String res = super.toString();
+        res += "  continAddr: " + continAddr;
+        res += "  continLen: " + continLen;
+        return res;
+    }
 
-
-MsgObjHdrContin(
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-{
-  super( TP_OBJ_HDR_CONTIN, hdfGroup, hdfFile);
+    // Format everything after the message header
+    @Override
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        throwerr("We do not use continuations");
+        fmtBuf.putBufLong("MsgObjHdrContin: continAddr", continAddr);
+        fmtBuf.putBufLong("MsgObjHdrContin: continLen", continLen);
+    }
 }
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  res += "  continAddr: " + continAddr;
-  res += "  continLen: " + continLen;
-  return res;
-}
-
-
-
-
-
-// Format everything after the message header
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  throwerr("We do not use continuations");
-  fmtBuf.putBufLong("MsgObjHdrContin: continAddr", continAddr);
-  fmtBuf.putBufLong("MsgObjHdrContin: continLen", continLen);
-}
-
-
-
-
-} // end class

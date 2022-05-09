@@ -23,23 +23,18 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
 /**
- * HDF5 message type 10: MsgGroupInfo:
- * Used to keep some group-related constants.
+ * HDF5 message type 10: MsgGroupInfo: Used to keep some group-related
+ * constants.
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  */
+final class MsgGroupInfo extends MsgBase {
 
-class MsgGroupInfo extends MsgBase {
-
-
-
-final int groupInfoVersion = 0;
+    final int groupInfoVersion = 0;
 
 // Flag bits:
 //   bit  mask  desc
@@ -47,36 +42,23 @@ final int groupInfoVersion = 0;
 //   1     2   estimated entry info is stored
 //   2-7       reserved
 
-final int groupFlag = 0;
+    final int groupFlag = 0;
 
+    MsgGroupInfo(HdfGroup hdfGroup, // the owning group
+            HdfFileWriter hdfFile) throws HdfException {
+        super(TP_GROUPINFO, hdfGroup, hdfFile);
+    }
 
-
-MsgGroupInfo(
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-throws HdfException
-{
-  super( TP_GROUPINFO, hdfGroup, hdfFile);
-}
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  return res;
-}
-
-
-
-
+    // TODO necessary?
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
 // Format everything after the message header
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  fmtBuf.putBufByte("MsgGroupInfo: groupInfoVersion", groupInfoVersion);
-  fmtBuf.putBufByte("MsgGroupInfo: groupFlag", groupFlag);
+    @Override
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        fmtBuf.putBufByte("MsgGroupInfo: groupInfoVersion", groupInfoVersion);
+        fmtBuf.putBufByte("MsgGroupInfo: groupFlag", groupFlag);
+    }
 }
-
-} // end class

@@ -23,90 +23,61 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.netcdf;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import edu.ucar.ral.nujan.hdf.HdfException;
 import edu.ucar.ral.nujan.hdf.HdfGroup;
-
 
 /**
  * Represents one dimension for an NhVariable.
  */
+public final class NhDimension {
 
-public class NhDimension {
-
-String dimName;
-int dimLen;
-NhGroup parentGroup;
+    String dimName;
+    int dimLen;
+    NhGroup parentGroup;
 
 // If this dimension is represented by a coordinate variable,
 // note it.
-NhVariable coordVar = null;
+    NhVariable coordVar = null;
 
-
-HdfGroup hdfDimVar;     // used by NhFile.endDefine().
+    HdfGroup hdfDimVar; // used by NhFile.endDefine().
 
 // Variables that use this NhDimension
-ArrayList<NhVariable> refList = new ArrayList<NhVariable>();
+    List<NhVariable> refList = new ArrayList<NhVariable>();
 
+    NhDimension(String dimName, int dimLen, NhGroup parentGroup) throws NhException {
+        this.dimName = dimName;
+        this.dimLen = dimLen;
+        this.parentGroup = parentGroup;
+    } // end constructor
 
+    public String toString() {
+        String res = String.format("name: \"%s\"  length: %d", dimName, dimLen);
+        return res;
+    }
 
-NhDimension(
-  String dimName,
-  int dimLen,
-  NhGroup parentGroup)
-throws NhException
-{
-  this.dimName = dimName;
-  this.dimLen = dimLen;
-  this.parentGroup = parentGroup;
-} // end constructor
+    /**
+     * Returns the name of this dimension.
+     */
+    public String getName() {
+        return dimName;
+    }
 
+    /**
+     * Returns the numeric length of this dimension.
+     */
+    public int getLength() {
+        return dimLen;
+    }
 
+    static void throwerr(String msg, Object... args) throws NhException {
+        throw new NhException(String.format(msg, args));
+    }
 
-
-
-public String toString() {
-  String res = String.format("name: \"%s\"  length: %d", dimName, dimLen);
-  return res;
+    static void prtf(String msg, Object... args) {
+        System.out.printf(msg + "\n", args);
+    }
 }
-
-
-
-/**
- * Returns the name of this dimension.
- */
-
-public String getName() {
-  return dimName;
-}
-
-
-/**
- * Returns the numeric length of this dimension.
- */
-
-public int getLength() {
-  return dimLen;
-}
-
-
-
-static void throwerr( String msg, Object... args)
-throws NhException
-{
-  throw new NhException( String.format( msg, args));
-}
-
-
-
-static void prtf( String msg, Object... args) {
-  System.out.printf( msg + "\n", args);
-}
-
-
-
-} // end class

@@ -23,80 +23,60 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
-
-
 /**
- * HDF5 message type 21: MsgAttrInfo:
- * attribute info (not the Attribute itself - see MsgAttribute).
+ * HDF5 message type 21: MsgAttrInfo: attribute info (not the Attribute itself -
+ * see MsgAttribute).
  * <p>
- * Extends abstract MsgBase, so we must implement formatMsgCore -
- * see the documentation for class {@link MsgBase}.
+ * Extends abstract MsgBase, so we must implement formatMsgCore - see the
+ * documentation for class {@link MsgBase}.
  * <p>
  * A new MsgAttrInfo is created in the HdfGroup constructors.
  */
 
 class MsgAttrInfo extends MsgBase {
 
+    final int version = 0;
 
+    /**
+     * Flag bits:
+     * <ul>
+     * <li>0: track creation order for attrs
+     * <li>1: index creation order for attrs
+     * </ul>
+     */
 
+    final int flag = 3;
 
-final int version = 0;
+    /**
+     * @param hdfGroup The owning HdfGroup.
+     * @param hdfFile  The global owning HdfFileWriter.
+     */
 
-/**
- * Flag bits:<ul>
- *   <li> 0:  track creation order for attrs
- *   <li> 1:  index creation order for attrs
- * </ul>
- */
+    MsgAttrInfo(HdfGroup hdfGroup, // the owning group
+            HdfFileWriter hdfFile) {
+        super(TP_ATTR_INFO, hdfGroup, hdfFile);
+    }
 
-final int flag = 3;
+// TODO does this do anything at all?
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
+    /**
+     * Extends abstract MsgBase: formats everything after the message header into
+     * fmtBuf. Called by MsgBase.formatFullMsg and MsgBase.formatNakedMsg.
+     */
 
-/**
- * @param hdfGroup The owning HdfGroup.
- * @param hdfFile The global owning HdfFileWriter.
- */
-
-MsgAttrInfo(
-  HdfGroup hdfGroup,              // the owning group
-  HdfFileWriter hdfFile)
-{
-  super( TP_ATTR_INFO, hdfGroup, hdfFile);
-}
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  return res;
-}
-
-
-
-
-/**
- * Extends abstract MsgBase:
- * formats everything after the message header into fmtBuf.
- * Called by MsgBase.formatFullMsg and MsgBase.formatNakedMsg.
- */
-
-void formatMsgCore( int formatPass, HBuffer fmtBuf)
-throws HdfException
-{
-  fmtBuf.putBufByte("MsgAttrInfo: version", version);
-  fmtBuf.putBufByte("MsgAttrInfo: flag", flag);
-  fmtBuf.putBufShort("MsgAttrInfo: maxCreIx",
-    hdfGroup.getNumAttribute());
-  fmtBuf.putBufLong("MsgAttrInfo: fractalHeap", HdfFileWriter.UNDEFINED_ADDR);
-  fmtBuf.putBufLong("MsgAttrInfo: nameTree", HdfFileWriter.UNDEFINED_ADDR);
-  fmtBuf.putBufLong("MsgAttrInfo: orderTree", HdfFileWriter.UNDEFINED_ADDR);
-}
-
-
-
+    void formatMsgCore(int formatPass, HBuffer fmtBuf) throws HdfException {
+        fmtBuf.putBufByte("MsgAttrInfo: version", version);
+        fmtBuf.putBufByte("MsgAttrInfo: flag", flag);
+        fmtBuf.putBufShort("MsgAttrInfo: maxCreIx", (short) hdfGroup.getNumAttribute());
+        fmtBuf.putBufLong("MsgAttrInfo: fractalHeap", HdfFileWriter.UNDEFINED_ADDR);
+        fmtBuf.putBufLong("MsgAttrInfo: nameTree", HdfFileWriter.UNDEFINED_ADDR);
+        fmtBuf.putBufLong("MsgAttrInfo: orderTree", HdfFileWriter.UNDEFINED_ADDR);
+    }
 
 } // end class

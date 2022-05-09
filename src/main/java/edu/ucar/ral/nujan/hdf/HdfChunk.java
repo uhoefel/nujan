@@ -23,49 +23,40 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.hdf;
 
 import java.util.Arrays;
 
+final class HdfChunk {
 
+    /** start indices of this chunk in the hyperslab */
+    int[] chunkStartIxs;
 
-class HdfChunk {
+    HdfGroup hdfGroup; // the owning group
 
-int[] chunkStartIxs;      // start indices of this chunk in the hyperslab
-HdfGroup hdfGroup;        // the owning group
+    long chunkDataSize; // size = disk space used; may be less than the
+                        // product of dims * eleSize if compressed
+    long chunkDataAddr; // offset on disk
 
-long chunkDataSize;       // size = disk space used; may be less than the
-                          //   product of dims * eleSize if compressed
-long chunkDataAddr;       // offset on disk
+    /**
+     * 
+     * @param chunkStartIxs
+     * @param hdfGroup the owning group
+     * @throws HdfException
+     */
+    HdfChunk(int[] chunkStartIxs, HdfGroup hdfGroup) throws HdfException {
+        if (chunkStartIxs == null)
+            HdfUtil.throwerr("invalid chunkStartIxs");
+        this.chunkStartIxs = Arrays.copyOf(chunkStartIxs, chunkStartIxs.length);
+        this.hdfGroup = hdfGroup;
 
+        chunkDataSize = 0;
+        chunkDataAddr = 0;
+    } // end constructor
 
-
-HdfChunk(
-  int[] chunkStartIxs,
-  HdfGroup hdfGroup)      // the owning group
-throws HdfException
-{
-  if (chunkStartIxs == null)
-    HdfUtil.throwerr("invalid chunkStartIxs");
-  this.chunkStartIxs = Arrays.copyOf( chunkStartIxs, chunkStartIxs.length);
-  this.hdfGroup = hdfGroup;
-
-  chunkDataSize = 0;
-  chunkDataAddr = 0;
-} // end constructor
-
-
-
-public String toString() {
-  String res =
-      "  chunkStartIxs: " + HdfUtil.formatInts( chunkStartIxs) + "\n"
-    + "  chunkDataSize: " + chunkDataSize + "\n"
-    + "  chunkDataAddr: " + chunkDataAddr;
-  return res;
-} // end toString
-
-} // end class
-
-
-
+    @Override
+    public String toString() {
+        return "  chunkStartIxs: " + HdfUtil.formatInts(chunkStartIxs) + "\n" + "  chunkDataSize: "
+                + chunkDataSize + "\n" + "  chunkDataAddr: " + chunkDataAddr;
+    }
+}

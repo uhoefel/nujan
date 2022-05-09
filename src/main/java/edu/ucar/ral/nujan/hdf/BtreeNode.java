@@ -22,260 +22,213 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
-
-
 package edu.ucar.ral.nujan.hdf;
 
-import java.util.ArrayList;
-
+import java.util.List;
 
 /**
  * Represents a Btree node, required for chunked data.
  * <p>
- * Rather than have a full tree structure, we just use a single
- * leaf node that may be huge.  Performance tests have shown
- * this performs as well as the hierarchical tree structure.
+ * Rather than have a full tree structure, we just use a single leaf node that
+ * may be huge. Performance tests have shown this performs as well as the
+ * hierarchical tree structure.
  *
- * BtreeNodes are used in only one place:<ul>
- *   <li> MsgLayout uses a BtreeNode
- *     to point to the raw data chunks.
- *     Theoretically we could have a whole tree of chunks, but
- *     we always have exactly 1 chunk.  In general this is like
- *     the contiguous format, but we must use chunked since
- *     HDF5 compression requires chunked format.
+ * BtreeNodes are used in only one place:
+ * <ul>
+ * <li>MsgLayout uses a BtreeNode to point to the raw data chunks. Theoretically
+ * we could have a whole tree of chunks, but we always have exactly 1 chunk. In
+ * general this is like the contiguous format, but we must use chunked since
+ * HDF5 compression requires chunked format.
  * </ul>
  *
  */
-
 class BtreeNode extends BaseBlk {
 
+    /** The group containing the chunks to be represented by this BtreeNode */
+    HdfGroup hdfGroup;
 
-/** The group containing the chunks to be represented by this BtreeNode */
-HdfGroup hdfGroup;
+    List<byte[]> keyList;
 
-ArrayList<byte[]> keyList;
+    int compressionLevel;
 
-int compressionLevel;
+    final int signa = 'T'; // "TREE"
+    final int signb = 'R';
+    final int signc = 'E';
+    final int signd = 'E';
 
-final int signa = 'T';       // "TREE"
-final int signb = 'R';
-final int signc = 'E';
-final int signd = 'E';
+    int nodeLevel;
 
-int nodeLevel;
+    final byte[] lowKey = new byte[5];
 
+    final byte[] highKey = { (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff };
 
-
-
-final byte[] lowKey = new byte[5];
-
-final byte[] highKey = new byte[] {
-  (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff, (byte) 0xff};
-
-
-
-
-
-/**
- * Constructor chunked data trees.
- *
- * @param compressionLevel Zip compression level:
- *        0 is uncompressed; 1 - 9 are increasing compression.
- * @param hdfGroup The owning group, containing the chunks to be
- *        represented by this BtreeNode.
- * @param hdfFile The global owning HdfFileWriter.
- */
-
-BtreeNode(
-  int compressionLevel,
-  HdfGroup hdfGroup,
-  HdfFileWriter hdfFile)
-{
-  super("BtreeNode", hdfFile);
-  this.compressionLevel = compressionLevel;
-  this.hdfGroup = hdfGroup;
-}
-
-
-
-
-
-
-public String toString() {
-  String res = super.toString();
-  res += "  nodeLevel: " + nodeLevel;
-  res += "  group: \"" + hdfGroup.groupName + "\"";
-  return res;
-}
-
-
-
-
-
-
-/**
- * Formats this individual BaseBlk to fmtBuf;
- * calls addWork to add any referenced BaseBlks (subNode, subTable)
- * to workList; extends abstract BaseBlk.
- *
- * <pre>
- * The formatted output is always the same, the fileVersion==1 format.
- * Oddly fileVersion==2 only uses Btrees for the chunked data
- * (not for group names), but still requires fileVersion==1 Btrees
- * for data chunks.
- *
- * We must format all the entries to fill out the btree node,
- * even if some are empty.
- * If the full table is not present, the HDF5 C software
- * may die when it tries to load the table and finds
- * the max table length extends beyond the end of file.
- *
- * A sample stack trace is appended to this file.
- *
- * ==========
- *
- * Analysis of Btree node size in HDF5 1.8.4 C API.
- *
- * See H5B.c:1784
- *     shared->sizeof_rnode = (H5B_SIZEOF_HDR(f) +    // node header
- *       shared->two_k * H5F_SIZEOF_ADDR(f) +         // child pointers
- *       (shared->two_k + 1) * shared->sizeof_rkey);  // keys
- * 
- * Expanding:
- *     shared->sizeof_rnode = (
- *       H5B_SIZEOF_HDR(f)
- *              # See H5B.c:118
- *              #   header: 4(magic) + 1(type) + 1(level) + 2(numUsed)
- *              #         + 8(leftSibling) + 8(rightSibling) = 24
- * 
- *     + shared->two_k
- *              # See H5B.c:1761,1780
- *              #     H5B_shared_new(...)
- *              #     two_k = 2 * H5F_KVALUE(f, type)
- *              # See H5Fprivate.h:267
- *              #     #define H5F_KVALUE(F,T)         (H5F_Kvalue(F,T))
- *              # See H5Fquery.c:289
- *              #     H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
- *              #     returns: f->shared->sblock->btree_k[type->id]
- *              #       = 2 * shared->sblock->btree_k[type(SNODE or CHUNK)]
- *              #
- *              # However, sometimes the btree_k we specify is
- *              # overridden by the default:
- *              # See H5Fsuper_cache.c:267
- *              #     btree_k[H5B_CHUNK_ID] = HDF5_BTREE_CHUNK_IK_DEF;
- *              # See H5Fprivate.h:396
- *              #     #define HDF5_BTREE_SNODE_IK_DEF         16
- *              #     #define HDF5_BTREE_CHUNK_IK_DEF         32
- *              #     /* Note! this value is assumed to be 32 for
- *              #     version 0 of the superblock and if it is
- *              #     changed, the code must compensate. -QAK
- * 
- *     * H5F_SIZEOF_ADDR(f)
- *              # See H5Fprivate.h:240
- *              #     #define H5F_SIZEOF_ADDR(F)   ((F)->shared->sizeof_addr)
- *               #     = 8   # len of ptr
- * 
- *     + (shared->two_k + 1) * shared->sizeof_rkey);
- *              # See H5Dbtree.c: H5D_btree_shared_create
- *              #   sizeof_rkey = 4 +         # chunk size
- *              #                 4 +         # filter mask
- *              #                 ndims * 8;  # dimension offsets
- * </pre>
- *
- * @param formatPass: <ul>
- *   <li> 1: Initial formatting to determine the formatted length.
- *          In HdfGroup we add msgs to hdrMsgList.
- *   <li> 2: Final formatting.
- * </ul>
- * @param fmtBuf  output buffer
- */
-
-
-
-
-
-
-
-void formatBuf(
-  int formatPass,
-  HBuffer fmtBuf)
-throws HdfException
-{
-  setFormatEntry( formatPass, true, fmtBuf); // BaseBlk: set blkPos, buf pos
-
-  int numChunk = hdfGroup.hdfChunks.length;
-  if (numChunk > hdfFile.maxNumBtreeKid) hdfFile.maxNumBtreeKid = numChunk;
-
-  fmtBuf.putBufByte("BtreeNode: signa", signa);       // "TREE"
-  fmtBuf.putBufByte("BtreeNode: signb", signb);
-  fmtBuf.putBufByte("BtreeNode: signc", signc);
-  fmtBuf.putBufByte("BtreeNode: signd", signd);
-
-  fmtBuf.putBufByte("BtreeNode: nodeType", 1);   // data node
-  fmtBuf.putBufByte("BtreeNode: nodeLevel", nodeLevel);
-
-  fmtBuf.putBufShort("BtreeNode: numChunk", numChunk);
-
-  fmtBuf.putBufLong("BtreeNode: leftSibling.pos",
-    HdfFileWriter.UNDEFINED_ADDR);
-
-  fmtBuf.putBufLong("BtreeNode: rightSibling.pos",
-    HdfFileWriter.UNDEFINED_ADDR);
-
-
-  // Only one format, since fileVersion==2 uses fileVersion==1 format.
-
-  // Turn on bit i to skip filter i.
-  int filterMask = 0;                      // use all filters
-
-  // For each chunk, format: chunkSize, key, diskAddr
-  for (int ichunk = 0; ichunk < hdfGroup.hdfChunks.length; ichunk++) {
-    HdfChunk chunk = hdfGroup.hdfChunks[ichunk];
-
-    fmtBuf.putBufInt("BtreeNode: chunkSize",
-      (int) chunk.chunkDataSize);     // xxx convert long to int
-    fmtBuf.putBufInt("BtreeNode: key filterMask", filterMask);
-    for (int ii = 0; ii < hdfGroup.varRank; ii++) {
-      fmtBuf.putBufLong("BtreeNode: key startIx", chunk.chunkStartIxs[ii]);
+    /**
+     * Constructor chunked data trees.
+     *
+     * @param compressionLevel Zip compression level: 0 is uncompressed; 1 - 9 are
+     *                         increasing compression.
+     * @param hdfGroup         The owning group, containing the chunks to be
+     *                         represented by this BtreeNode.
+     * @param hdfFile          The global owning HdfFileWriter.
+     */
+    BtreeNode(int compressionLevel, HdfGroup hdfGroup, HdfFileWriter hdfFile) {
+        super("BtreeNode", hdfFile);
+        this.compressionLevel = compressionLevel;
+        this.hdfGroup = hdfGroup;
     }
-    fmtBuf.putBufLong("BtreeNode: key eleLen offset", 0);
 
-    // Format the child pointer
-    fmtBuf.putBufLong("BtreeNode: chunk addr", chunk.chunkDataAddr);
-  }
-
-  // Format the final key
-  fmtBuf.putBufInt("BtreeNode: final key chunkSize", 0);
-  fmtBuf.putBufInt("BtreeNode: final key filterMask", filterMask);
-  for (int jj = 0; jj < hdfGroup.varRank; jj++) {
-    fmtBuf.putBufLong("BtreeNode: final key dimOffset", hdfGroup.varDims[jj]);
-  }
-  fmtBuf.putBufLong("BtreeNode: final key eleLen offset",
-    hdfGroup.msgDataType.elementLen);
-
-  // We must format all the entries to fill out the btree node,
-  // even if some are empty.
-  // See doc at method start.
-  int safe_k_value = 128;     // >= HDF5_BTREE_CHUNK_IK_DEF == 32
-  for (int ii = 0; ii < 2 * safe_k_value - 1; ii++) {
-    // Format the fake child pointer
-    fmtBuf.putBufLong("BtreeNode: fill chunk addr", 0);
-
-    // Format the fill key
-    fmtBuf.putBufInt("BtreeNode: fill key chunkSize", 0);
-    fmtBuf.putBufInt("BtreeNode: fill key mask", 0);
-    for (int jj = 0; jj < hdfGroup.msgDataSpace.rank; jj++) {
-      fmtBuf.putBufLong("BtreeNode: fill key dimOffset", 0);
+    @Override
+    public String toString() {
+        String res = super.toString();
+        res += "  nodeLevel: " + nodeLevel;
+        res += "  group: \"" + hdfGroup.groupName + "\"";
+        return res;
     }
-    fmtBuf.putBufLong("BtreeNode: fill key eleLen offset", 0);
-  } // for ii
 
+    /**
+     * Formats this individual BaseBlk to fmtBuf; calls addWork to add any
+     * referenced BaseBlks (subNode, subTable) to workList; extends abstract
+     * BaseBlk.
+     *
+     * <pre>
+     * The formatted output is always the same, the fileVersion==1 format.
+     * Oddly fileVersion==2 only uses Btrees for the chunked data
+     * (not for group names), but still requires fileVersion==1 Btrees
+     * for data chunks.
+     *
+     * We must format all the entries to fill out the btree node,
+     * even if some are empty.
+     * If the full table is not present, the HDF5 C software
+     * may die when it tries to load the table and finds
+     * the max table length extends beyond the end of file.
+     *
+     * A sample stack trace is appended to this file.
+     *
+     * ==========
+     *
+     * Analysis of Btree node size in HDF5 1.8.4 C API.
+     *
+     * See H5B.c:1784
+     *     shared->sizeof_rnode = (H5B_SIZEOF_HDR(f) +    // node header
+     *       shared->two_k * H5F_SIZEOF_ADDR(f) +         // child pointers
+     *       (shared->two_k + 1) * shared->sizeof_rkey);  // keys
+     * 
+     * Expanding:
+     *     shared->sizeof_rnode = (
+     *       H5B_SIZEOF_HDR(f)
+     *              # See H5B.c:118
+     *              #   header: 4(magic) + 1(type) + 1(level) + 2(numUsed)
+     *              #         + 8(leftSibling) + 8(rightSibling) = 24
+     * 
+     *     + shared->two_k
+     *              # See H5B.c:1761,1780
+     *              #     H5B_shared_new(...)
+     *              #     two_k = 2 * H5F_KVALUE(f, type)
+     *              # See H5Fprivate.h:267
+     *              #     #define H5F_KVALUE(F,T)         (H5F_Kvalue(F,T))
+     *              # See H5Fquery.c:289
+     *              #     H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
+     *              #     returns: f->shared->sblock->btree_k[type->id]
+     *              #       = 2 * shared->sblock->btree_k[type(SNODE or CHUNK)]
+     *              #
+     *              # However, sometimes the btree_k we specify is
+     *              # overridden by the default:
+     *              # See H5Fsuper_cache.c:267
+     *              #     btree_k[H5B_CHUNK_ID] = HDF5_BTREE_CHUNK_IK_DEF;
+     *              # See H5Fprivate.h:396
+     *              #     #define HDF5_BTREE_SNODE_IK_DEF         16
+     *              #     #define HDF5_BTREE_CHUNK_IK_DEF         32
+     *              #     /* Note! this value is assumed to be 32 for
+     *              #     version 0 of the superblock and if it is
+     *              #     changed, the code must compensate. -QAK
+     * 
+     *     * H5F_SIZEOF_ADDR(f)
+     *              # See H5Fprivate.h:240
+     *              #     #define H5F_SIZEOF_ADDR(F)   ((F)->shared->sizeof_addr)
+     *               #     = 8   # len of ptr
+     * 
+     *     + (shared->two_k + 1) * shared->sizeof_rkey);
+     *              # See H5Dbtree.c: H5D_btree_shared_create
+     *              #   sizeof_rkey = 4 +         # chunk size
+     *              #                 4 +         # filter mask
+     *              #                 ndims * 8;  # dimension offsets
+     * </pre>
+     *
+     * @param formatPass
+     *                    <ul>
+     *                    <li>1: Initial formatting to determine the formatted
+     *                    length. In HdfGroup we add msgs to hdrMsgList.
+     *                    <li>2: Final formatting.
+     *                    </ul>
+     * @param fmtBuf      output buffer
+     */
+    void formatBuf(int formatPass, HBuffer fmtBuf) throws HdfException {
+        setFormatEntry(formatPass, true, fmtBuf); // BaseBlk: set blkPos, buf pos
 
-  noteFormatExit( fmtBuf);         // BaseBlk: print debug
-} // end formatBuf
+        int numChunk = hdfGroup.hdfChunks.length;
+        if (numChunk > hdfFile.maxNumBtreeKid)
+            hdfFile.maxNumBtreeKid = numChunk;
 
-} // end class
+        fmtBuf.putBufByte("BtreeNode: signa", signa); // "TREE"
+        fmtBuf.putBufByte("BtreeNode: signb", signb);
+        fmtBuf.putBufByte("BtreeNode: signc", signc);
+        fmtBuf.putBufByte("BtreeNode: signd", signd);
 
+        fmtBuf.putBufByte("BtreeNode: nodeType", 1); // data node
+        fmtBuf.putBufByte("BtreeNode: nodeLevel", nodeLevel);
+
+        fmtBuf.putBufShort("BtreeNode: numChunk", (short) numChunk);
+
+        fmtBuf.putBufLong("BtreeNode: leftSibling.pos", HdfFileWriter.UNDEFINED_ADDR);
+
+        fmtBuf.putBufLong("BtreeNode: rightSibling.pos", HdfFileWriter.UNDEFINED_ADDR);
+
+        // Only one format, since fileVersion==2 uses fileVersion==1 format.
+
+        // Turn on bit i to skip filter i.
+        int filterMask = 0; // use all filters
+
+        // For each chunk, format: chunkSize, key, diskAddr
+        for (int ichunk = 0; ichunk < hdfGroup.hdfChunks.length; ichunk++) {
+            HdfChunk chunk = hdfGroup.hdfChunks[ichunk];
+
+            fmtBuf.putBufInt("BtreeNode: chunkSize", (int) chunk.chunkDataSize); // xxx convert long to int
+            fmtBuf.putBufInt("BtreeNode: key filterMask", filterMask);
+            for (int ii = 0; ii < hdfGroup.varRank; ii++) {
+                fmtBuf.putBufLong("BtreeNode: key startIx", chunk.chunkStartIxs[ii]);
+            }
+            fmtBuf.putBufLong("BtreeNode: key eleLen offset", 0);
+
+            // Format the child pointer
+            fmtBuf.putBufLong("BtreeNode: chunk addr", chunk.chunkDataAddr);
+        }
+
+        // Format the final key
+        fmtBuf.putBufInt("BtreeNode: final key chunkSize", 0);
+        fmtBuf.putBufInt("BtreeNode: final key filterMask", filterMask);
+        for (int jj = 0; jj < hdfGroup.varRank; jj++) {
+            fmtBuf.putBufLong("BtreeNode: final key dimOffset", hdfGroup.varDims[jj]);
+        }
+        fmtBuf.putBufLong("BtreeNode: final key eleLen offset", hdfGroup.msgDataType.elementLen);
+
+        // We must format all the entries to fill out the btree node,
+        // even if some are empty.
+        // See doc at method start.
+        int safe_k_value = 128; // >= HDF5_BTREE_CHUNK_IK_DEF == 32
+        for (int i = 0; i < 2*safe_k_value-1; i++) {
+            // Format the fake child pointer
+            fmtBuf.putBufLong("BtreeNode: fill chunk addr", 0);
+
+            // Format the fill key
+            fmtBuf.putBufInt("BtreeNode: fill key chunkSize", 0);
+            fmtBuf.putBufInt("BtreeNode: fill key mask", 0);
+            for (int jj = 0; jj < hdfGroup.msgDataSpace.rank; jj++) {
+                fmtBuf.putBufLong("BtreeNode: fill key dimOffset", 0);
+            }
+            fmtBuf.putBufLong("BtreeNode: fill key eleLen offset", 0);
+        }
+    }
+}
 
 // Sample stack trace from HDF5 1.8.4 when there aren't
 // as many empty entries in the btree node as the C software
@@ -378,4 +331,3 @@ throws HdfException
 //     at /home/ss/ftp/hdf5/tda/hdf5-1.8.4-patch1/tools/h5dump/h5dump.c:755
 // #34 0x080525a3 in main (argc=2, argv=0xbfffdab4)
 //     at /home/ss/ftp/hdf5/tda/hdf5-1.8.4-patch1/tools/h5dump/h5dump.c:4403
-

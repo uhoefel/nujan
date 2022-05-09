@@ -23,20 +23,14 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
-
 package edu.ucar.ral.nujan.netcdf;
 
-
 /**
- * Represents most Exceptions in this package.  Simply extends Exception.
+ * Represents most Exceptions in this package. Simply extends Exception.
  */
-
 public class NhException extends Exception {
 
-public NhException( String msg) {
-  super( msg);
+    public NhException(String msg) {
+        super(msg);
+    }
 }
-
-} // end class
-
-
