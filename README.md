@@ -1,9 +1,21 @@
 # Nujan
-This is the official home for Nujan source code.  Nujan was developed by the NCAR Research Applications Laboratory as a pure Java netCDF-4 and HDF-5 writer.  
+This is not the official home for the Nujan source code.  
+It is a fork, with a little bit of cleanup, being ready to be used with JPMS (modules).
+The artifact can be found at maven central:
+```xml
+<dependency>
+    <groupId>eu.hoefel</groupId>
+    <artifactId>nujan</artifactId>
+    <version>1.4.6</version>
+</dependency>
+```
 
-[![Build Status](https://travis-ci.org/NCAR/nujan.svg?branch=master)](https://travis-ci.org/NCAR/nujan)
+Nujan was developed by the NCAR Research Applications Laboratory as a pure Java netCDF-4 and HDF-5 writer.  
 
-Nujan is 100% open source and is released under the MIT license. Nujan is intended to be useful in situations where portability and a simplified development process are more important than access to the complete HDF5 feature set.  Nujan creates files compatible with:
+Nujan is 100% open source and is released under the MIT license. 
+Nujan is intended to be useful in situations where portability and a simplified 
+development process are more important than access to the complete HDF5 feature 
+set.  Nujan creates files compatible with:
 
 * HDF5 1.8.5 and later
 * NetCDF 4.1.1 and later
