@@ -465,8 +465,8 @@ public class NhCompare {
             }
 
             else { // else shapes match
-                Class tpa = arra.getElementType();
-                Class tpb = arrb.getElementType();
+                Class<?> tpa = arra.getElementType();
+                Class<?> tpb = arrb.getElementType();
                 if (tpa != tpb) {
                     numEleDiff += 1;
                     prtIndent(indent, grpName, "Diff: %s  element types differ:  %s  %s", tag, tpa, tpb);

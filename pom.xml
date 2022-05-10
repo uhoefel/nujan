@@ -56,31 +56,20 @@
     <!-- ================================================ -->
 
     <repositories>
-
         <repository>
-            <id>central</id>
-            <name>Central Maven Repo</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <id>unidata-all</id>
+            <name>Unidata All</name>
+            <url>https://artifacts.unidata.ucar.edu/repository/unidata-all/</url>
         </repository>
-
-        <repository>
-            <id>unidata-releases</id>
-            <url>http://artifacts.unidata.ucar.edu/content/repositories/unidata-releases</url>
-        </repository>
-
-        <repository>
-            <id>Boundlessgeo</id>
-            <url>https://repo.boundlessgeo.com/main/</url>
-        </repository>
-
     </repositories>
 
 
     <dependencies>
         <dependency>
             <groupId>edu.ucar</groupId>
-            <artifactId>cdm</artifactId>
-            <version>5.1.0</version>
+            <artifactId>cdm-core</artifactId>
+            <version>5.5.2</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
