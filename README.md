@@ -2,6 +2,7 @@
 This is not the official home for the Nujan source code.  
 It is a fork, with a little bit of cleanup, being ready to be used with JPMS (modules).
 The artifact can be found at maven central:
+
 ```xml
 <dependency>
     <groupId>eu.hoefel</groupId>

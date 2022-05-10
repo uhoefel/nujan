@@ -60,53 +60,71 @@ final class NhUtil {
      * Formats a general Object by recursively examining it if it's an array.
      */
     static void formatObjectSub(Object obj, int indent, StringBuilder sbuf) {
-        if (obj == null)
+        if (obj == null) {
             sbuf.append(String.format("%s(null)\n", mkIndent(indent)));
-        else if (obj instanceof String str) {
+//        } else if (obj instanceof String str) {
+        } else if (obj instanceof String) {
+            String str = (String) obj;
             sbuf.append(String.format("%s(String) \"%s\"\n", mkIndent(indent), str));
-        } else if (obj instanceof byte[] vals) {
+//        } else if (obj instanceof byte[] vals) {
+        } else if (obj instanceof byte[]) {
+            byte[] vals = (byte[]) obj;
             sbuf.append(mkIndent(indent) + "(bytes)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof short[] vals) {
+//        } else if (obj instanceof short[] vals) {
+        } else if (obj instanceof short[]) {
+            short[] vals = (short[]) obj;
             sbuf.append(mkIndent(indent) + "(shorts)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof int[] vals) {
+//        } else if (obj instanceof int[] vals) {
+        } else if (obj instanceof int[]) {
+            int[] vals = (int[]) obj;
             sbuf.append(mkIndent(indent) + "(ints)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof long[] vals) {
+//        } else if (obj instanceof long[] vals) {
+        } else if (obj instanceof long[]) {
+            long[] vals = (long[]) obj;
             sbuf.append(mkIndent(indent) + "(longs)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof float[] vals) {
+//        } else if (obj instanceof float[] vals) {
+        } else if (obj instanceof float[]) {
+            float[] vals = (float[]) obj;
             sbuf.append(mkIndent(indent) + "(floats)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof double[] vals) {
+//        } else if (obj instanceof double[] vals) {
+        } else if (obj instanceof double[]) {
+            double[] vals = (double[]) obj;
             sbuf.append(mkIndent(indent) + "(doubles)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof char[] vals) {
+//        } else if (obj instanceof char[] vals) {
+        } else if (obj instanceof char[]) {
+            char[] vals = (char[]) obj;
             sbuf.append(mkIndent(indent) + "(chars)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof Object[] vals) {
+//        } else if (obj instanceof Object[] vals) {
+        } else if (obj instanceof Object[]) {
+            Object[] vals = (Object[]) obj;
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append(String.format("%s%d  cls: %s:\n", mkIndent(indent), i, vals[i].getClass().getName()));
                 formatObjectSub(vals[i], indent + 1, sbuf);

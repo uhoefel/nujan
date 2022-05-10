@@ -200,47 +200,60 @@ final class MsgFillValue extends MsgBase {
             tbuf.order(ByteOrder.LITTLE_ENDIAN);
 
             if (dtype == HdfGroup.DTYPE_SFIXED08 || dtype == HdfGroup.DTYPE_UFIXED08) {
-                if (!(fillValue instanceof Byte byt)) {
+//                if (!(fillValue instanceof Byte byt)) {
+                if (!(fillValue instanceof Byte)) {
                     throw new HdfException("fill type mismatch.  Expected: Byte.  Found: " + fillValue.getClass()
                             + "  for group: " + hdfGroup.getPath());
                 }
+                Byte byt = (Byte) fillValue;
                 tbuf.put(byt);
             } else if (dtype == HdfGroup.DTYPE_FIXED16) {
-                if (!(fillValue instanceof Short shrt)) {
+//                if (!(fillValue instanceof Short shrt)) {
+                if (!(fillValue instanceof Short)) {
                     throw new HdfException("fill type mismatch.  Expected: Short.  Found: " + fillValue.getClass()
                             + "  for group: " + hdfGroup.getPath());
                 }
+                Short shrt = (Short) fillValue;
                 tbuf.putShort(shrt);
             } else if (dtype == HdfGroup.DTYPE_FIXED32) {
-                if (!(fillValue instanceof Integer intg)) {
+//                if (!(fillValue instanceof Integer intg)) {
+                if (!(fillValue instanceof Integer)) {
                     throw new HdfException("fill type mismatch.  Expected: Integer.  Found: " + fillValue.getClass() + "  for group: "
                             + hdfGroup.getPath());
                 }
-                    
+                Integer intg = (Integer) fillValue;
                 tbuf.putInt(intg);
             } else if (dtype == HdfGroup.DTYPE_FIXED64) {
-                if (!(fillValue instanceof Long lng)) {
+//                if (!(fillValue instanceof Long lng)) {
+                if (!(fillValue instanceof Long)) {
                     throw new HdfException("fill type mismatch.  Expected: Long.  Found: " + fillValue.getClass() + "  for group: "
                             + hdfGroup.getPath());
                 }
+                Long lng = (Long) fillValue;
                 tbuf.putLong(lng);
             } else if (dtype == HdfGroup.DTYPE_FLOAT32) {
-                if (!(fillValue instanceof Float flot)) {
+//                if (!(fillValue instanceof Float flot)) {
+                if (!(fillValue instanceof Float)) {
                     throw new HdfException("fill type mismatch.  Expected: Float.  Found: " + fillValue.getClass()
                             + "  for group: " + hdfGroup.getPath());
                 }
+                Float flot = (Float) fillValue;
                 tbuf.putFloat(flot);
             } else if (dtype == HdfGroup.DTYPE_FLOAT64) {
-                if (!(fillValue instanceof Double doble)) {
+//                if (!(fillValue instanceof Double doble)) {
+                if (!(fillValue instanceof Double)) {
                     throw new HdfException("fill type mismatch.  Expected: Double.  Found: " + fillValue.getClass() + "  for group: "
                             + hdfGroup.getPath());
                 }
+                Double doble = (Double) fillValue;
                 tbuf.putDouble(doble);
             } else if (dtype == HdfGroup.DTYPE_STRING_FIX) {
-                if (!(fillValue instanceof String str)) {
+//                if (!(fillValue instanceof String str)) {
+                if (!(fillValue instanceof String)) {
                     throw new HdfException("fill type mismatch.  Expected: String.  Found: " + fillValue.getClass()
                             + "  for group: " + hdfGroup.getPath());
                 }
+                String str = (String) fillValue;
                 byte[] bytes = HdfUtil.encodeString(str, true, hdfGroup);
                 tbuf.put(bytes);
             } else { // dtype == HdfGroup.DTYPE_STRING_VAR has to be true here, as we otherwise throw an exception above

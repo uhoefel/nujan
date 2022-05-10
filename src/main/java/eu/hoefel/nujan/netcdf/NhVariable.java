@@ -223,9 +223,13 @@ public final class NhVariable {
                 stgFieldLen = 1;
 
                 if (hdfFillValue == null) {
-                } else if (hdfFillValue instanceof Character chr) {
+//                } else if (hdfFillValue instanceof Character chr) {
+                } else if (hdfFillValue instanceof Character) {
+                    Character chr = (Character) hdfFillValue;
                     hdfFillValue = new String(new char[] { chr }); // stg len = 1
-                } else if (hdfFillValue instanceof String stg) {
+//                } else if (hdfFillValue instanceof String stg) {
+                } else if (hdfFillValue instanceof String) {
+                    String stg = (String) hdfFillValue;
                     if (stg.length() > 1) {
                         throw new NhException("char fillValue is String len > 1");
                     }
@@ -463,7 +467,9 @@ public final class NhVariable {
             throw new NhException("scalar variable must have startIxs == null");
         }
 
-        if (rawData instanceof Array arr) {
+//        if (rawData instanceof Array arr) {
+        if (rawData instanceof Array) {
+            Array arr = (Array) rawData;
             if (arr.getRank() == 0) {
                 // Wow, what a hack.
                 if (arr.getSize() != 1) {
@@ -555,9 +561,9 @@ public final class NhVariable {
                 resValue = new String[0];
             else
                 resValue = new String(vals);
-        }
-
-        else if (attrValue instanceof Object[] objs) {
+//        } else if (attrValue instanceof Object[] objs) {
+        } else if (attrValue instanceof Object[]) {
+            Object[] objs = (Object[]) attrValue;
             // Allow vec of objs, each of which is a String
             for (Object obj : objs) {
                 if (!(obj instanceof String)) {
@@ -602,9 +608,13 @@ public final class NhVariable {
 
         // Special case for scalars
         if (dlens.length == 0) {
-            if (rawData instanceof Character spec) {
+//            if (rawData instanceof Character spec) {
+            if (rawData instanceof Character) {
+                Character spec = (Character) rawData;
                 vdata = new String(new char[] { spec.charValue() }); // stg len = 1
-            } else if (rawData instanceof String rawStg) {
+//            } else if (rawData instanceof String rawStg) {
+            } else if (rawData instanceof String) {
+                String rawStg = (String) rawData;
                 if (rawStg.length() > 1) {
                     throw new NhException("scalar data has len > 1");
                 }
@@ -615,7 +625,9 @@ public final class NhVariable {
         }
 
         else if (dlens.length == 1) {
-            if (rawData instanceof char[] rawChars) {
+//            if (rawData instanceof char[] rawChars) {
+            if (rawData instanceof char[]) {
+                char[] rawChars = (char[]) rawData;
                 // Convert char[] to String[] where each element has length 1.
                 int nn = dlens[0];
                 if (rawChars.length > nn) {
@@ -630,7 +642,9 @@ public final class NhVariable {
                         stgs[ii] = "";
                 }
                 vdata = stgs;
-            } else if (rawData instanceof String rawStg) {
+//            } else if (rawData instanceof String rawStg) {
+            } else if (rawData instanceof String) {
+                String rawStg = (String) rawData;
                 // Convert String to String[] where each element has length 1.
                 int nn = dlens[0];
                 if (rawStg.length() > nn) {
@@ -653,9 +667,11 @@ public final class NhVariable {
             int nn = dlens[0];
             int[] subDlens = Arrays.copyOfRange(dlens, 1, dlens.length);
 
-            if (!(rawData instanceof Object[] rawObjs)) {
+//            if (!(rawData instanceof Object[] rawObjs)) {
+            if (!(rawData instanceof Object[])) {
                 throw new NhException("rawData wrong class: " + rawData.getClass());
             }
+            Object[] rawObjs = (Object[]) rawData;
             if (rawObjs.length > dlens[0]) {
                 throw new NhException("data len exceeds bounds");
             }

@@ -101,7 +101,9 @@ class HdfUtil {
         int dimLen = -1;
         int deltaNum = 0;
 
-        if (obj instanceof byte[] vals) {
+//        if (obj instanceof byte[] vals) {
+        if (obj instanceof byte[]) {
+            byte[] vals = (byte[]) obj;
             dtype = HdfGroup.DTYPE_UFIXED08;
             elementLen.setValue(1);
             dimLen = vals.length;
@@ -111,7 +113,9 @@ class HdfUtil {
             elementLen.setValue(1);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof short[] vals) {
+//        } else if (obj instanceof short[] vals) {
+        } else if (obj instanceof short[]) {
+            short[] vals = (short[]) obj;
             elementLen.setValue(2);
             dtype = HdfGroup.DTYPE_FIXED16;
             dimLen = vals.length;
@@ -121,7 +125,9 @@ class HdfUtil {
             elementLen.setValue(2);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof int[] vals) {
+//        } else if (obj instanceof int[] vals) {
+        } else if (obj instanceof int[]) {
+            int[] vals = (int[]) obj;
             dtype = HdfGroup.DTYPE_FIXED32;
             elementLen.setValue(4);
             dimLen = vals.length;
@@ -131,7 +137,9 @@ class HdfUtil {
             elementLen.setValue(4);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof long[] vals) {
+//        } else if (obj instanceof long[] vals) {
+        } else if (obj instanceof long[]) {
+            long[] vals = (long[]) obj;
             dtype = HdfGroup.DTYPE_FIXED64;
             elementLen.setValue(8);
             dimLen = vals.length;
@@ -141,7 +149,9 @@ class HdfUtil {
             elementLen.setValue(8);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof float[] vals) {
+//        } else if (obj instanceof float[] vals) {
+        } else if (obj instanceof float[]) {
+            float[] vals = (float[]) obj;
             dtype = HdfGroup.DTYPE_FLOAT32;
             elementLen.setValue(4);
             dimLen = vals.length;
@@ -151,7 +161,9 @@ class HdfUtil {
             elementLen.setValue(4);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof double[] vals) {
+//        } else if (obj instanceof double[] vals) {
+        } else if (obj instanceof double[]) {
+            double[] vals = (double[]) obj;
             dtype = HdfGroup.DTYPE_FLOAT64;
             elementLen.setValue(8);
             dimLen = vals.length;
@@ -161,7 +173,9 @@ class HdfUtil {
             elementLen.setValue(4);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof char[] vals) {
+//        } else if (obj instanceof char[] vals) {
+        } else if (obj instanceof char[]) {
+            char[] vals = (char[]) obj;
             dtype = HdfGroup.DTYPE_STRING_FIX;
             elementLen.setValue(Math.max(elementLen.getValue(), vals.length));
             dimLen = vals.length;
@@ -171,19 +185,25 @@ class HdfUtil {
             elementLen.setValue(1);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof String[] vals) {
+//        } else if (obj instanceof String[] vals) {
+        } else if (obj instanceof String[]) {
+            String[] vals = (String[]) obj;
             dtype = HdfGroup.DTYPE_STRING_VAR;
             for (String val : vals) {
                 elementLen.setValue(Math.max(elementLen.getValue(), val.length()));
             }
             dimLen = vals.length;
             deltaNum = vals.length;
-        } else if (obj instanceof String val) {
+//        } else if (obj instanceof String val) {
+        } else if (obj instanceof String) {
+            String val = (String) obj;
             dtype = HdfGroup.DTYPE_STRING_VAR;
             elementLen.setValue(Math.max(elementLen.getValue(), val.length()));
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof HdfGroup[] vals) { // reference
+//        } else if (obj instanceof HdfGroup[] vals) { // reference
+        } else if (obj instanceof HdfGroup[]) { // reference
+            HdfGroup[] vals = (HdfGroup[]) obj;
             dtype = HdfGroup.DTYPE_REFERENCE;
             elementLen.setValue(HdfFileWriter.OFFSET_SIZE);
             dimLen = vals.length;
@@ -193,7 +213,8 @@ class HdfUtil {
             elementLen.setValue(HdfFileWriter.OFFSET_SIZE);
             dimLen = -1; // scalar
             deltaNum = 1;
-        } else if (obj instanceof Object[] vals) { // Main recursion
+        } else if (obj instanceof Object[]) { // Main recursion
+            Object[] vals = (Object[]) obj;
             dimLen = vals.length;
         }
 
@@ -222,7 +243,9 @@ class HdfUtil {
         totNumEle.setValue(totNumEle.getValue() + deltaNum);
 
         // Recursion
-        if (obj instanceof Object[] objs) {
+//        if (obj instanceof Object[] objs) {
+        if (obj instanceof Object[]) {
+            Object[] objs = (Object[]) obj;
             for (Object subObj : objs) {
                 getDimLenSub(subObj, isVlen, curDim + 1, eleType, totNumEle, elementLen, dimList);
             }
@@ -356,11 +379,17 @@ class HdfUtil {
      */
     static int getMaxStgLen(Object obj) {
         int maxStgLen = 0;
-        if (obj instanceof String str) {
+//        if (obj instanceof String str) {
+        if (obj instanceof String) {
+            String str = (String) obj;
             maxStgLen = str.length();
-        } else if (obj instanceof char[] chr) {
+//        } else if (obj instanceof char[] chr) {
+        } else if (obj instanceof char[]) {
+            char[] chr = (char[]) obj;
             maxStgLen = Math.max(maxStgLen, chr.length);
-        } else if (obj instanceof Object[] objVec) { // String[] or char[][]
+//        } else if (obj instanceof Object[] objVec) { // String[] or char[][]
+        } else if (obj instanceof Object[]) { // String[] or char[][]
+            Object[] objVec = (Object[]) obj;
             for (int i = 0; i < objVec.length; i++) {
                 maxStgLen = Math.max(maxStgLen, getMaxStgLen(objVec[i]));
             }
@@ -490,53 +519,71 @@ class HdfUtil {
      * Formats a general Object by recursively examining it if it's an array.
      */
     static void formatObjectSub(Object obj, int indent, StringBuilder sbuf) {
-        if (obj == null)
+        if (obj == null) {
             sbuf.append(String.format("%s(null)\n", mkIndent(indent)));
-        else if (obj instanceof String str) {
+//        } else if (obj instanceof String str) {
+        } else if (obj instanceof String) {
+            String str = (String) obj;
             sbuf.append(String.format("%s(String) \"%s\"\n", mkIndent(indent), str));
-        } else if (obj instanceof byte[] vals) {
+//        } else if (obj instanceof byte[] vals) {
+        } else if (obj instanceof byte[]) {
+            byte[] vals = (byte[]) obj;
             sbuf.append(mkIndent(indent) + "(bytes)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof short[] vals) {
+//        } else if (obj instanceof short[] vals) {
+        } else if (obj instanceof short[]) {
+            short[] vals = (short[]) obj;
             sbuf.append(mkIndent(indent) + "(shorts)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof int[] vals) {
+//        } else if (obj instanceof int[] vals) {
+        } else if (obj instanceof int[]) {
+            int[] vals = (int[]) obj;
             sbuf.append(mkIndent(indent) + "(ints)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof long[] vals) {
+//        } else if (obj instanceof long[] vals) {
+        } else if (obj instanceof long[]) {
+            long[] vals = (long[]) obj;
             sbuf.append(mkIndent(indent) + "(longs)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof float[] vals) {
+//        } else if (obj instanceof float[] vals) {
+        } else if (obj instanceof float[]) {
+            float[] vals = (float[]) obj;
             sbuf.append(mkIndent(indent) + "(floats)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof double[] vals) {
+//        } else if (obj instanceof double[] vals) {
+        } else if (obj instanceof double[]) {
+            double[] vals = (double[]) obj;
             sbuf.append(mkIndent(indent) + "(doubles)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof char[] vals) {
+//        } else if (obj instanceof char[] vals) {
+        } else if (obj instanceof char[]) {
+            char[] vals = (char[]) obj;
             sbuf.append(mkIndent(indent) + "(chars)");
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append("  " + vals[i]);
             }
             sbuf.append("\n");
-        } else if (obj instanceof Object[] vals) {
+//        } else if (obj instanceof Object[] vals) {
+        } else if (obj instanceof Object[]) {
+            Object[] vals = (Object[]) obj;
             for (int i = 0; i < vals.length; i++) {
                 sbuf.append(String.format("%s%d  cls: %s:\n", mkIndent(indent), i, vals[i].getClass().getName()));
                 formatObjectSub(vals[i], indent + 1, sbuf);

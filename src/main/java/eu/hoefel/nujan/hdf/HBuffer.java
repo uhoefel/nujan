@@ -224,11 +224,9 @@ final class HBuffer {
     private void writeCompressedOutput() {
         logger.finer(() -> {
             try {
-                return """
-                        writeCompressedOutput.entry:
-                            bbuf: pos: %d  limit: %d  capacity: %d
-                            outChannel: pos: %d
-                        """.formatted(getPos(), bbuf.limit(), bbuf.capacity(), outChannel.position());
+                return String.format(
+                        "writeCompressedOutput.entry:\n  bbuf: pos: %d  limit: %d  capacity: %d\n  outChannel: pos: %d",
+                        getPos(), bbuf.limit(), bbuf.capacity(), outChannel.position());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -259,10 +257,7 @@ final class HBuffer {
 
         logger.finer(() -> {
             try {
-                return """
-                        writeCompressedOutput.exit:
-                            outChannel: pos: %d
-                        """.formatted(outChannel.position());
+                return String.format("writeCompressedOutput.exit:\n  outChannel: pos: %d",outChannel.position());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

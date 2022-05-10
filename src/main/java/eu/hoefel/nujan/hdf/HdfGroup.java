@@ -918,7 +918,9 @@ public final class HdfGroup extends BaseBlk {
     public MsgAttribute findAttribute(String attrName) {
         MsgAttribute resMsg = null;
         for (MsgBase baseMsg : hdrMsgList) {
-            if (baseMsg instanceof MsgAttribute attrMsg && attrMsg.attrName.equals(attrName)) {
+//            if (baseMsg instanceof MsgAttribute attrMsg && attrMsg.attrName.equals(attrName)) {
+            if (baseMsg instanceof MsgAttribute && ((MsgAttribute)baseMsg).attrName.equals(attrName)) {
+                MsgAttribute attrMsg = (MsgAttribute) baseMsg;
                 resMsg = attrMsg;
                 break;
             }
@@ -1387,11 +1389,17 @@ public final class HdfGroup extends BaseBlk {
             fmtBuf.putBufShort("HdfGroup: minNumDense", (short) 0);
         }
 
+//        switch (lenMask) {
+//            case 0 -> fmtBuf.putBufByte("HdfGroup: chunk0Len", (int) prevChunk0Len);
+//            case 1 -> fmtBuf.putBufShort("HdfGroup: chunk0Len", (short) prevChunk0Len);
+//            case 2 -> fmtBuf.putBufInt("HdfGroup: chunk0Len", (int) prevChunk0Len);
+//            case 3 -> fmtBuf.putBufLong("HdfGroup: chunk0Len", prevChunk0Len);
+//        }
         switch (lenMask) {
-            case 0 -> fmtBuf.putBufByte("HdfGroup: chunk0Len", (int) prevChunk0Len);
-            case 1 -> fmtBuf.putBufShort("HdfGroup: chunk0Len", (short) prevChunk0Len);
-            case 2 -> fmtBuf.putBufInt("HdfGroup: chunk0Len", (int) prevChunk0Len);
-            case 3 -> fmtBuf.putBufLong("HdfGroup: chunk0Len", prevChunk0Len);
+            case 0: fmtBuf.putBufByte("HdfGroup: chunk0Len", (int) prevChunk0Len); break;
+            case 1: fmtBuf.putBufShort("HdfGroup: chunk0Len", (short) prevChunk0Len); break;
+            case 2: fmtBuf.putBufInt("HdfGroup: chunk0Len", (int) prevChunk0Len); break;
+            case 3: fmtBuf.putBufLong("HdfGroup: chunk0Len", prevChunk0Len); break;
         }
 
         // Write out all the messages
@@ -1527,33 +1535,49 @@ public final class HdfGroup extends BaseBlk {
 
         // Special case for scalars and empty arrays
         if (rank == 0) {
-            if (vdata instanceof Byte byt) {
+//            if (vdata instanceof Byte byt) {
+            if (vdata instanceof Byte) {
+                Byte byt = (Byte) vdata;
                 checkDtype(DTYPE_SFIXED08, DTYPE_UFIXED08, dtp);
                 byte aval = byt.byteValue();
                 fmtBuf.putBufByte("formatRawData", aval);
-            } else if (vdata instanceof Short aval) {
+//            } else if (vdata instanceof Short aval) {
+            } else if (vdata instanceof Short) {
+                Short aval = (Short) vdata;
                 checkDtype(DTYPE_FIXED16, dtp);
                 fmtBuf.putBufShort("formatRawData", aval);
-            } else if (vdata instanceof Integer aval) {
+//            } else if (vdata instanceof Integer aval) {
+            } else if (vdata instanceof Integer) {
+                Integer aval = (Integer) vdata;
                 checkDtype(DTYPE_FIXED32, dtp);
                 fmtBuf.putBufInt("formatRawData", aval);
-            } else if (vdata instanceof Long aval) {
+//            } else if (vdata instanceof Long aval) {
+            } else if (vdata instanceof Long) {
+                Long aval = (Long) vdata;
                 checkDtype(DTYPE_FIXED64, dtp);
                 fmtBuf.putBufLong("formatRawData", aval);
-            } else if (vdata instanceof Float aval) {
+//            } else if (vdata instanceof Float aval) {
+            } else if (vdata instanceof Float) {
+                Float aval = (Float) vdata;
                 checkDtype(DTYPE_FLOAT32, dtp);
                 fmtBuf.putBufFloat("formatRawData", aval);
-            } else if (vdata instanceof Double aval) {
+//            } else if (vdata instanceof Double aval) {
+            } else if (vdata instanceof Double) {
+                Double aval = (Double) vdata;
                 checkDtype(DTYPE_FLOAT64, dtp);
                 fmtBuf.putBufDouble("formatRawData", aval);
-            } else if (vdata instanceof Character chr) {
+//            } else if (vdata instanceof Character chr) {
+            } else if (vdata instanceof Character) {
+                Character chr = (Character) vdata;
                 // Normally we would handle character encoding by
                 // calling HdfUtil.encodeString.
                 // However the final length is fixed, so we must
                 // do 1 char -> 1 byte encoding.
                 checkDtype(DTYPE_STRING_FIX, dtp);
                 fmtBuf.putBufByte("formatRawData", chr);
-            } else if (vdata instanceof String aval) {
+//            } else if (vdata instanceof String aval) {
+            } else if (vdata instanceof String) {
+                String aval = (String) vdata;
                 checkDtype(DTYPE_STRING_FIX, DTYPE_STRING_VAR, dtp);
                 if (dtp == DTYPE_STRING_FIX) {
                     byte[] bytes = HdfUtil.encodeString(aval, false, this);
@@ -1567,7 +1591,9 @@ public final class HdfGroup extends BaseBlk {
                 } else {
                     throw new HdfException("dtp mismatch");
                 }
-            } else if (vdata instanceof HdfGroup hdfgroup) {
+//            } else if (vdata instanceof HdfGroup hdfgroup) {
+            } else if (vdata instanceof HdfGroup) {
+                HdfGroup hdfgroup = (HdfGroup) vdata;
                 // For object refs, data is:
                 // addr of group header, 8 bytes.
                 // For region refs, data is:
@@ -1665,7 +1691,9 @@ public final class HdfGroup extends BaseBlk {
                     // we will set vdataOb to be the last int[].
                     vdataOb = vdata;
                     for (int i = 0; i < rank-1; i++) {
-                        if (vdataOb instanceof Object[] objVec) {
+//                        if (vdataOb instanceof Object[] objVec) {
+                        if (vdataOb instanceof Object[]) {
+                            Object[] objVec = (Object[]) vdataOb;
                             if (curIxs[i] >= objVec.length) {
                                 throw new HdfException("dim err");
                             }
@@ -1677,32 +1705,44 @@ public final class HdfGroup extends BaseBlk {
                     linearIx = 0;
                 }
 
-                if (vdataOb instanceof byte[] avec) {
+//                if (vdataOb instanceof byte[] avec) {
+                if (vdataOb instanceof byte[]) {
+                    byte[] avec = (byte[]) vdataOb;
                     checkDtype(DTYPE_SFIXED08, DTYPE_UFIXED08, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufByte("formatRawData", 0xff & avec[linearIx + i]);
                     }
-                } else if (vdataOb instanceof short[] avec) {
+//                } else if (vdataOb instanceof short[] avec) {
+                } else if (vdataOb instanceof short[]) {
+                    short[] avec = (short[]) vdataOb;
                     checkDtype(DTYPE_FIXED16, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufShort("formatRawData", avec[linearIx + i]);
                     }
-                } else if (vdataOb instanceof int[] avec) {
+//                } else if (vdataOb instanceof int[] avec) {
+                } else if (vdataOb instanceof int[]) {
+                    int[] avec = (int[]) vdataOb;
                     checkDtype(DTYPE_FIXED32, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufInt("formatRawData", avec[linearIx + i]);
                     }
-                } else if (vdataOb instanceof long[] avec) {
+//                } else if (vdataOb instanceof long[] avec) {
+                } else if (vdataOb instanceof long[]) {
+                    long[] avec = (long[]) vdataOb;
                     checkDtype(DTYPE_FIXED64, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufLong("formatRawData", avec[linearIx + i]);
                     }
-                } else if (vdataOb instanceof float[] avec) {
+//                } else if (vdataOb instanceof float[] avec) {
+                } else if (vdataOb instanceof float[]) {
+                    float[] avec = (float[]) vdataOb;
                     checkDtype(DTYPE_FLOAT32, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufFloat("formatRawData", avec[linearIx + i]);
                     }
-                } else if (vdataOb instanceof double[] avec) {
+//                } else if (vdataOb instanceof double[] avec) {
+                } else if (vdataOb instanceof double[]) {
+                    double[] avec = (double[]) vdataOb;
                     checkDtype(DTYPE_FLOAT64, dtp);
                     for (int i = 0; i < writeLen; i++) {
                         fmtBuf.putBufDouble("formatRawData", avec[linearIx + i]);
@@ -1710,7 +1750,8 @@ public final class HdfGroup extends BaseBlk {
                 }
 
                 else if (vdataOb instanceof String[]
-                        || (vdataOb instanceof Object[] objs && objs[0] instanceof String)) {
+//                        || (vdataOb instanceof Object[] objs && objs[0] instanceof String)) {
+                        || (vdataOb instanceof Object[] && ((Object[])vdataOb)[0] instanceof String)) {
                     checkDtype(DTYPE_STRING_FIX, DTYPE_STRING_VAR, dtp);
                     Object[] avec = (Object[]) vdataOb;
                     for (int ii = 0; ii < writeLen; ii++) {
@@ -1730,7 +1771,9 @@ public final class HdfGroup extends BaseBlk {
                             throw new HdfException("dtp mismatch");
                         }
                     }
-                } else if (vdataOb instanceof HdfGroup[] hgroup) {
+//                } else if (vdataOb instanceof HdfGroup[] hgroup) {
+                } else if (vdataOb instanceof HdfGroup[]) {
+                    HdfGroup[] hgroup = (HdfGroup[]) vdataOb;
                     for (var grp : hgroup) {
                         long aval = grp.blkPosition;
                         fmtBuf.putBufLong("formatRawData", aval);
@@ -1813,23 +1856,45 @@ public final class HdfGroup extends BaseBlk {
 //                case Object[] o -> o.length;
 //                default -> throw new HdfException(String.format("unknown vrow type: %s", vrow.getClass()));
 //            };
+            // the one below with not-quite-so-modern Java
+//            int ncol;
+//            if (vrow instanceof byte[] b) {
+//                ncol = b.length;
+//            } else if (vrow instanceof char[] c) {
+//                ncol = c.length;
+//            } else if (vrow instanceof short[] s) {
+//                ncol = s.length;
+//            } else if (vrow instanceof int[] i) {
+//                ncol = i.length;
+//            } else if (vrow instanceof long[] l) {
+//                ncol = l.length;
+//            } else if (vrow instanceof float[] f) {
+//                ncol = f.length;
+//            } else if (vrow instanceof double[] d) {
+//                ncol = d.length;
+//            } else if (vrow instanceof Object[] o) {
+//                ncol = o.length;
+//            } else {
+//                throw new HdfException(String.format("unknown vrow type: %s", vrow.getClass()));
+//            }
+            
             int ncol;
-            if (vrow instanceof byte[] b) {
-                ncol = b.length;
-            } else if (vrow instanceof char[] c) {
-                ncol = c.length;
-            } else if (vrow instanceof short[] s) {
-                ncol = s.length;
-            } else if (vrow instanceof int[] i) {
-                ncol = i.length;
-            } else if (vrow instanceof long[] l) {
-                ncol = l.length;
-            } else if (vrow instanceof float[] f) {
-                ncol = f.length;
-            } else if (vrow instanceof double[] d) {
-                ncol = d.length;
-            } else if (vrow instanceof Object[] o) {
-                ncol = o.length;
+            if (vrow instanceof byte[]) {
+                ncol = ((byte[])vrow).length;
+            } else if (vrow instanceof char[]) {
+                ncol = ((char[])vrow).length;
+            } else if (vrow instanceof short[]) {
+                ncol = ((short[])vrow).length;
+            } else if (vrow instanceof int[]) {
+                ncol = ((int[])vrow).length;
+            } else if (vrow instanceof long[]) {
+                ncol = ((long[])vrow).length;
+            } else if (vrow instanceof float[]) {
+                ncol = ((float[])vrow).length;
+            } else if (vrow instanceof double[]) {
+                ncol = ((double[])vrow).length;
+            } else if (vrow instanceof Object[]) {
+                ncol = ((Object[])vrow).length;
             } else {
                 throw new HdfException(String.format("unknown vrow type: %s", vrow.getClass()));
             }
