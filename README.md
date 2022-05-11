@@ -1,6 +1,6 @@
 # Nujan
-This is not the official home for the Nujan source code.  
-It is a fork, with a little bit of cleanup, being ready to be used with [JPMS (modules)](https://en.wikipedia.org/wiki/Java_Platform_Module_System).
+This is *not* the official home for the Nujan source code.  
+It is a fork, with a little bit of cleanup.
 The artifact can be found at maven central:
 
 ```xml

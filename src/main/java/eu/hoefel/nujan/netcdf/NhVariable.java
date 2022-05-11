@@ -208,10 +208,10 @@ public final class NhVariable {
         // Although declared as H5T_STR_NULLTERM, the null-termination
         // isn't stored in the file.
 
-        boolean isScalar = false;
-        if (nhDims != null && nhDims.length == 0) {
-            isScalar = true;
-        }
+//        boolean isScalar = false;
+//        if (nhDims != null && nhDims.length == 0) {
+//            isScalar = true;
+//        }
 
         dtype = findDtype(varName, nhType);
 

@@ -30,14 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import eu.hoefel.nujan.hdf.HdfException;
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
 import ucar.ma2.Index;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
 import ucar.nc2.Group;
-import ucar.nc2.NetcdfFile;
+import ucar.nc2.NetcdfFiles;
 import ucar.nc2.Variable;
 
 // Future:
@@ -113,15 +112,12 @@ class NhCopy {
 
     static void copyIt(String[] args) throws NhException {
         int bugs = 0;
-        String logDir = null;
-        String statTag = null;
         int compressionLevel = -1;
         String inFile = null;
         String outFile = null;
         int numFieldSpec = 0;
         HashMap<String, FieldSpec> fieldMap = new HashMap<>();
 
-        long utcModTime = 0;
         boolean useLinear = false; // for performance testing only
         boolean useArray = false; // for performance testing only
 
@@ -182,20 +178,6 @@ class NhCopy {
                 }
             } // if key == "-field"
 
-            else if (key.equals("-testValLog")) {
-                logDir = val;
-                statTag = "stats";
-            }
-
-            else if (key.equals("-utcModTime")) {
-                try {
-                    utcModTime = NhUtil.parseUtcTime(val);
-                } catch (HdfException exc) {
-                    exc.printStackTrace();
-                    badparms(bugs, "invalid -utcModTime: \"" + val + "\"");
-                }
-            }
-
             else if (key.equals("-useLinear"))
                 useLinear = parseBoolean("-useLinear", val);
             else if (key.equals("-useArray"))
@@ -244,11 +226,8 @@ class NhCopy {
             }
         }
 
-        NetcdfFile inCdf = null;
-        NhFileWriter outCdf = null;
-        try {
-            inCdf = NetcdfFile.open(inFile);
-            outCdf = new NhFileWriter(outFile, NhFileWriter.OPT_OVERWRITE);
+        try (var inCdf = NetcdfFiles.open(inFile);
+             var outCdf = new NhFileWriter(outFile, NhFileWriter.OPT_OVERWRITE);) {
 
             Group inGroup = inCdf.getRootGroup();
             NhGroup outGroup = outCdf.getRootGroup();
@@ -259,10 +238,6 @@ class NhCopy {
 
             // pass 2: copy data
             copyGroup(2, numFieldSpec, fieldMap, compressionLevel, inGroup, outGroup, useLinear, useArray, bugs);
-            inCdf.close();
-            inCdf = null;
-            outCdf.close();
-            outCdf = null;
         } catch (Exception exc) {
             exc.printStackTrace();
             badparms(bugs, "const: caught: " + exc);
@@ -525,11 +500,11 @@ class NhCopy {
         if (fspec.iscale != SCALE_MISSING) {
             tmpType = fspec.nhPackType;
             if (fspec.nhPackType == NhVariable.TP_SBYTE)
-                tmpFill = new Byte((byte) fspec.packFillValue);
+                tmpFill = Byte.valueOf((byte) fspec.packFillValue);
             else if (fspec.nhPackType == NhVariable.TP_SHORT)
-                tmpFill = new Short((short) fspec.packFillValue);
+                tmpFill = Short.valueOf((short) fspec.packFillValue);
             else if (fspec.nhPackType == NhVariable.TP_INT)
-                tmpFill = new Integer((int) fspec.packFillValue);
+                tmpFill = Integer.valueOf(fspec.packFillValue);
             else
                 throwerr("unknown nhPackType");
         }
@@ -1077,7 +1052,7 @@ class NhCopy {
             prtf("getAttrValue: attr: %s", attr);
         Object attrValue = null;
         // Special case for Strings.
-        DataType atType = attr.getDataType();
+//        DataType atType = attr.getDataType();
         if (attr.isString()) {
             int alen = attr.getLength();
             if (alen == 1) {
@@ -1129,7 +1104,7 @@ class NhCopy {
             }
         }
 
-        Class eleType = arr.getElementType();
+        Class<?> eleType = arr.getElementType();
         Object resObj = null;
 
         // Special case for Strings.
@@ -1140,7 +1115,7 @@ class NhCopy {
         // Special case for scalar data of primitives.
         // Netcdf Array.copyToNDJavaArray dies on primitives of rank 0.
         else if (arr.getRank() == 0 && arr.getElementType().isPrimitive()) {
-            Class cls = arr.getElementType();
+            Class<?> cls = arr.getElementType();
             if (cls == Byte.TYPE)
                 resObj = arr.getByte(0);
             else if (cls == Short.TYPE)
@@ -1171,7 +1146,7 @@ class NhCopy {
     } // end decodeArray
 
     static Object decodeStringArray(Array arr, boolean useLinear, int bugs) throws NhException {
-        Class eleType = arr.getElementType();
+        Class<?> eleType = arr.getElementType();
         if (eleType != "".getClass()) // if not Strings
             throwerr("bad type for decodeStringArray");
 

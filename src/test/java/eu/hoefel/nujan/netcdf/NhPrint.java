@@ -221,7 +221,7 @@ public class NhPrint {
             }
         }
 
-        Class eleType = arr.getElementType();
+        Class<?> eleType = arr.getElementType();
         if (eleType != "".getClass()) { // if not String
             prtIndent(indent, "arr.copyTo1DJavaArray() type: %s", arr.copyTo1DJavaArray().getClass());
             // Netcdf Array.copyToNDJavaArray dies on primitives of rank 0.
