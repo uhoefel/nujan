@@ -457,37 +457,37 @@ class NhCopy {
                 byte[] vals = (byte[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Byte(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof short[]) {
                 short[] vals = (short[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Short(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof int[]) {
                 int[] vals = (int[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Integer(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof long[]) {
                 long[] vals = (long[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Long(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof float[]) {
                 float[] vals = (float[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Float(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof double[]) {
                 double[] vals = (double[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Double(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof char[]) {
                 char[] vals = (char[]) fillValue;
                 if (vals.length != 1)
                     throwerr("invalid fillValue for inVar: " + inVar);
-                fillValue = new Character(vals[0]);
+                fillValue = vals[0];
             } else if (fillValue instanceof Object[]) {
                 Object[] vals = (Object[]) fillValue;
                 if (vals.length != 1)
@@ -1142,19 +1142,19 @@ class NhCopy {
         else if (arr.getRank() == 0 && arr.getElementType().isPrimitive()) {
             Class cls = arr.getElementType();
             if (cls == Byte.TYPE)
-                resObj = new Byte(arr.getByte(0));
+                resObj = arr.getByte(0);
             else if (cls == Short.TYPE)
-                resObj = new Short(arr.getShort(0));
+                resObj = arr.getShort(0);
             else if (cls == Integer.TYPE)
-                resObj = new Integer(arr.getInt(0));
+                resObj = arr.getInt(0);
             else if (cls == Long.TYPE)
-                resObj = new Long(arr.getLong(0));
+                resObj = arr.getLong(0);
             else if (cls == Float.TYPE)
-                resObj = new Float(arr.getFloat(0));
+                resObj = arr.getFloat(0);
             else if (cls == Double.TYPE)
-                resObj = new Double(arr.getDouble(0));
+                resObj = arr.getDouble(0);
             else if (cls == Character.TYPE)
-                resObj = new Character(arr.getChar(0));
+                resObj = arr.getChar(0);
             else if (cls == "".getClass())
                 resObj = arr.getObject(0); // String
             else
