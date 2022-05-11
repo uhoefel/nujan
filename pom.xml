@@ -11,7 +11,8 @@
     <artifactId>nujan</artifactId>
     <version>1.4.6</version>
 
-    <name>Pure Java NetCDF4/HDF5 writing library</name>
+	<name>nujan</name>
+    <description>Pure Java NetCDF4/HDF5 writing library</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
