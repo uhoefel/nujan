@@ -21,7 +21,7 @@
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <junit.platform.version>1.8.2</junit.platform.version>
         <jdk.version>11</jdk.version>
-        <jvm.extraArgs></jvm.extraArgs>
+        <jvm.extraArgs>-Xdoclint:none</jvm.extraArgs>
     </properties>
 
     <url>${uhoefel.git.url}${project.name}</url>
