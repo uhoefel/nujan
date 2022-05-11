@@ -222,9 +222,6 @@
                 <configuration>
                     <!-- required due to https://github.com/apache/maven-surefire/pull/263 -->
                     <argLine>
-                       ${jvm.extraArgs}
-                       --add-exports org.junit.platform.commons/org.junit.platform.commons.util=ALL-UNNAMED
-                       --add-exports org.junit.platform.commons/org.junit.platform.commons.logging=ALL-UNNAMED
                     </argLine>
                 </configuration>
             </plugin>

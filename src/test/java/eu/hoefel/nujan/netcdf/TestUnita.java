@@ -32,7 +32,7 @@ import eu.hoefel.nujan.hdf.GenData;
 import eu.hoefel.nujan.hdf.HdfException;
 import eu.hoefel.nujan.hdf.HdfGroup;
 
-public class TestUnita {
+class TestUnita {
 
 // Set defaults when called by Maven's use of JUnit.
     int unitBugs = 0;

@@ -33,7 +33,7 @@ import ucar.ma2.ArrayFloat;
 // Test byte / ubyte / short / int / long / float / double / char / vstring,
 // with any number of dimensions.
 
-public class Tnetcdfa {
+class Tnetcdfa {
 
     static void badparms(String msg) {
         prtf("Error: %s", msg);

@@ -40,7 +40,7 @@ import ucar.nc2.Variable;
 // Uses the unidata netcdf library:
 // http://www.unidata.ucar.edu/software/netcdf-java/
 
-public class NhPrint {
+class NhPrint {
 
     static void badparms(String msg) {
         prtf("Error: " + msg);
