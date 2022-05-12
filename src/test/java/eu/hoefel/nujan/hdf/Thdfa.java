@@ -25,6 +25,7 @@
 
 package eu.hoefel.nujan.hdf;
 
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -201,7 +202,7 @@ class Thdfa {
 
         prtf("Thdfa: outFile: \"%s\"", outFile);
 
-        HdfFileWriter hfile = new HdfFileWriter(outFile, HdfFileWriter.OPT_ALLOW_OVERWRITE, utcModTime);
+        HdfFileWriter hfile = new HdfFileWriter(Paths.get(outFile), HdfFileWriter.OPT_ALLOW_OVERWRITE, utcModTime);
 
         HdfGroup rootGroup = hfile.getRootGroup();
 

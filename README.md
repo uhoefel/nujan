@@ -7,7 +7,7 @@ The artifact can be found at maven central:
 <dependency>
     <groupId>eu.hoefel</groupId>
     <artifactId>nujan</artifactId>
-    <version>1.4.6</version>
+    <version>1.4.7</version>
 </dependency>
 ```
 

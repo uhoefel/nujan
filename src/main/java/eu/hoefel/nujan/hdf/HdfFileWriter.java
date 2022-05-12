@@ -24,11 +24,13 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 package eu.hoefel.nujan.hdf;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -115,7 +117,7 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
     GlobalHeap mainGlobalHeap = null;
 
     /** The file path (name) of the output file on disk. */
-    String filePath;
+    private Path filePath;
 
     /**
      * Options passed to the constructor. Currently the only possible option is
@@ -144,9 +146,6 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
      * start of the file.
      */
     private HBuffer mainBuf;
-
-    /** Output stream for outFile, underneath outChannel. */
-    FileOutputStream outStream;
 
     /** Output channel for outFile, on top of outStream. */
     FileChannel outChannel;
@@ -214,6 +213,17 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
      *                 one implemented is {@link #OPT_ALLOW_OVERWRITE}.
      */
     public HdfFileWriter(String filePath, int optFlag) throws HdfException {
+        this(Paths.get(filePath), optFlag, 0); // debug = 0, modTime = 0
+    }
+
+    /**
+     * Creates a new HDF5 output file.
+     * 
+     * @param filePath The name or disk path of the file to create.
+     * @param optFlag  The bitwise OR of one or more OPT_* flags. Currently the only
+     *                 one implemented is {@link #OPT_ALLOW_OVERWRITE}.
+     */
+    public HdfFileWriter(Path filePath, int optFlag) throws HdfException {
         this(filePath, optFlag, 0); // debug = 0, modTime = 0
     }
 
@@ -227,7 +237,7 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
      *                   since 1970. If 0, we use the current time.
      *                   </ul>
      */
-    HdfFileWriter(String filePath, // file to create
+    HdfFileWriter(Path filePath, // file to create
             int optFlag, // zero or more OPT_* bit options
             long utcModTime // milliSecs since 1970, or if 0 use current time
             ) throws HdfException {
@@ -254,14 +264,15 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
         rootGroup = new HdfGroup(rootName, null, this); // parent = null
 
         try {
-            if (((optFlag & OPT_ALLOW_OVERWRITE) == 0) && new File(filePath).exists()) {
+            if (((optFlag & OPT_ALLOW_OVERWRITE) == 0) && Files.exists(filePath)) {
                 throw new HdfException("file " + filePath + " already exists");
             }
-            outStream = new FileOutputStream(filePath);
+            Files.deleteIfExists(filePath);
+            Files.createFile(filePath);
+            outChannel = FileChannel.open(filePath, StandardOpenOption.WRITE);
         } catch (IOException exc) {
             throw new UncheckedIOException(exc);
         }
-        outChannel = outStream.getChannel();
     }
 
     @Override
@@ -366,7 +377,6 @@ public final class HdfFileWriter extends BaseBlk implements AutoCloseable {
             outChannel.position(0);
             mainBuf.writeChannel(outChannel);
             outChannel.close();
-            outStream.close();
         } catch (IOException exc) {
             throw new UncheckedIOException(exc);
         }
