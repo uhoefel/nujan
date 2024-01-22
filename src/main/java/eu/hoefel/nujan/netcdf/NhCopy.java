@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import ucar.ma2.Array;
 import ucar.ma2.DataType;
@@ -543,7 +544,7 @@ class NhCopy {
     static NhDimension[] getNhDims(Variable inVar, NhGroup outGroup) throws NhException {
 
         // Make a list of our matching dimensions.
-        ArrayList<NhDimension> nhDimList = new ArrayList<NhDimension>();
+        List<NhDimension> nhDimList = new ArrayList<>();
         for (Dimension dim : inVar.getDimensions()) {
             // Search outGroup and it's ancestors for a NhDimension
             // having the same name as dim.
@@ -565,8 +566,7 @@ class NhCopy {
             nhDimList.add(nhDim);
         } // for each dim
 
-        NhDimension[] nhDims = nhDimList.toArray(new NhDimension[0]);
-        return nhDims;
+        return nhDimList.toArray(new NhDimension[0]);
     }
 
     static void copyAttribute(Attribute attr, String outName, // name of outObj, for error msgs
